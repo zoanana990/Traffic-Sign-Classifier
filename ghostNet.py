@@ -1,7 +1,6 @@
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Conv2D, GlobalAveragePooling2D, Reshape, Dropout
 from ghost_module import GhostModule
-from tensorflow.keras import backend as K
 
 class GhostNet(GhostModule):
     def __init__(self, shape, n_class, include_top=True):
@@ -14,7 +13,6 @@ class GhostNet(GhostModule):
         inputs = Input(shape=self.shape)
 
         x = self._conv_block(inputs, 16, (3, 3), strides=(2, 2))
-        print("Conv: shape = ", K.int_shape(x))
 
         x = self._ghost_bottleneck(x, 16, (3, 3), self.dw_kernel, 16, 1, self.ratio, False, name='ghost_bottleneck1')
         x = self._ghost_bottleneck(x, 24, (3, 3), self.dw_kernel, 48, 2, self.ratio, False, name='ghost_bottleneck2')
@@ -50,7 +48,7 @@ class GhostNet(GhostModule):
                    activation='softmax', use_bias=False)(x)
 
         if self.include_top:
-            x = Reshape((self.n_class,))(x)
+            x = Reshape((self.n_class, ))(x)
 
         model = Model(inputs, x)
 
