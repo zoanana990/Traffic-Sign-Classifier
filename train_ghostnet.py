@@ -137,8 +137,12 @@ NUM_CLASSES = 43
 ### training model
 model = ghostNet.GhostNet((32, 32, 3), NUM_CLASSES).build()
 model.summary()
-# if WEIGHTS_FINAL == True:
+
+### use pretraining model
+# try:
 #     model.load_weights(WEIGHTS_FINAL)
+# except:
+#     pass
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['acc'])
 result = model.fit(X_train, y_train, batch_size=BATCH_SIZE, epochs=EPOCHS,
                    validation_data=(X_valid, y_valid), shuffle=True)
@@ -151,6 +155,7 @@ plt.plot(result.epoch, result.history['val_acc'], label="val_acc")
 plt.scatter(result.epoch, result.history['acc'], marker='*')
 plt.scatter(result.epoch, result.history['val_acc'])
 plt.legend(loc='lower right')
+plt.title("GhostNet Accuracy")
 plt.show()
 
 plt.figure()
@@ -159,5 +164,6 @@ plt.plot(result.epoch, result.history['val_loss'], label="val_loss")
 plt.scatter(result.epoch, result.history['loss'], marker='*')
 plt.scatter(result.epoch, result.history['val_loss'])
 plt.legend(loc='upper right')
+plt.title("GhostNet Loss")
 plt.show()
 

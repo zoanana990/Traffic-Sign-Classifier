@@ -137,33 +137,22 @@ WEIGHTS_FINAL = 'ResNet.h5'
 FREEZE_LAYERS = 2
 NUM_CLASSES = 43
 
+### ResNet
 net = ResNet50(include_top=False, weights='imagenet', input_tensor=None,
                input_shape=(size[0], size[1], 3))
 x = net.output
 x = Flatten()(x)
-
-# 增加 DropOut layer
 x = Dropout(0.5)(x)
-
-# 增加 Dense layer，以 softmax 產生個類別的機率值
 output_layer = Dense(NUM_CLASSES, activation='softmax', name='softmax')(x)
-
-# 設定凍結與要進行訓練的網路層
 net_final = Model(inputs=net.input, outputs=output_layer)
 for layer in net_final.layers[:FREEZE_LAYERS]:
     layer.trainable = False
 for layer in net_final.layers[FREEZE_LAYERS:]:
     layer.trainable = True
-
-# 使用 Adam optimizer，以較低的 learning rate 進行 fine-tuning
 net_final.compile(optimizer=Adam(lr=1e-5),
-                  loss='categorical_crossentropy', metrics=['accuracy'])
-
-# 輸出整個網路結構
+                  loss='categorical_crossentropy', metrics=['acc'])
 print(net_final.summary())
-
-# 訓練模型
-result = net_final.fit(X_train, y_train, batch_size=BATCH_SIZE, epochs=EPOCHS)
+result = net_final.fit(X_train, y_train, batch_size=BATCH_SIZE, epochs=EPOCHS, validation_data=(X_valid, y_valid))
 
 # 儲存訓練好的模型
 net_final.save(WEIGHTS_FINAL)
@@ -173,7 +162,8 @@ plt.plot(result.epoch, result.history['acc'], label="acc")
 plt.plot(result.epoch, result.history['val_acc'], label="val_acc")
 plt.scatter(result.epoch, result.history['acc'], marker='*')
 plt.scatter(result.epoch, result.history['val_acc'])
-plt.legend(loc='upper right')
+plt.legend(loc='lower right')
+plt.title("Resnet Accuracy")
 plt.show()
 
 plt.figure()
@@ -182,5 +172,6 @@ plt.plot(result.epoch, result.history['val_loss'], label="val_loss")
 plt.scatter(result.epoch, result.history['loss'], marker='*')
 plt.scatter(result.epoch, result.history['val_loss'])
 plt.legend(loc='upper right')
+plt.title("Resnet Loss")
 plt.show()
 
